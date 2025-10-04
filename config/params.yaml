@@ -1,0 +1,5 @@
+safe_distance: 25
+scan_turn_ms: 350
+backoff_ms: 300
+forward_pwm: 180
+turn_pwm: 170
