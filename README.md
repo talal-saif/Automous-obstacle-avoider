@@ -1,5 +1,11 @@
 # 🚗 Autonomous Obstacle Avoider
 
+
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Stars](https://img.shields.io/github/stars/talal-saif/autonomous-obstacle-avoider?style=social)
+
+
 An advanced **autonomous robot** that detects and avoids obstacles in real time.  
 Built in **C++17** with **CMake**, supporting both **Simulation** and **Raspberry Pi hardware mode**.
 
