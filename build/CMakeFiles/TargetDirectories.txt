@@ -1,8 +1,0 @@
-/home/talalrobot/autonomous-obstacle-avoider/build/CMakeFiles/edit_cache.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/CMakeFiles/rebuild_cache.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/sim/CMakeFiles/autonomous_obstacle_avoider_sim.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/sim/CMakeFiles/edit_cache.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/sim/CMakeFiles/rebuild_cache.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/pi/CMakeFiles/autonomous_obstacle_avoider_pi.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/pi/CMakeFiles/edit_cache.dir
-/home/talalrobot/autonomous-obstacle-avoider/build/pi/CMakeFiles/rebuild_cache.dir

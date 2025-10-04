@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/autonomous_obstacle_avoider_sim.dir/src/main.cpp.o -o autonomous_obstacle_avoider_sim 

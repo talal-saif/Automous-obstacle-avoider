@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/autonomous_obstacle_avoider_pi.dir/src/main.cpp.o -o autonomous_obstacle_avoider_pi  -lpigpio -lrt -lpthread 
