@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build (root)",
+            "type": "shell",
+            "command": "cmake -S . -B build && cmake --build build -j",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Run SIM",
+            "type": "shell",
+            "command": "gazebo ${workspaceFolder}/sim/worlds/aoa.world",
+            "group": "none",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run PI",
+            "type": "shell",
+            "command": "./scripts/run_pi.sh",
+            "group": "none",
+            "problemMatcher": []
+        }
+    ]
+}

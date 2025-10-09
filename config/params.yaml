@@ -1,5 +1,15 @@
-safe_distance: 25
-scan_turn_ms: 350
-backoff_ms: 300
-forward_pwm: 180
-turn_pwm: 170
+safe_distance_cm: 25
+turn_ms: 350
+backoff_ms: 200
+forward_pwm: 160
+turn_pwm: 150
+
+pins:
+  trig: 5
+  echo: 6
+  in1: 17
+  in2: 27
+  ena: 22
+  in3: 23
+  in4: 24
+  enb: 25

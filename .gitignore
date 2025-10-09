@@ -1,9 +1,8 @@
-/build/
-/.cache/
-/CMakeCache.txt
-compile_commands.json
-*.swp
-*.cache
+build/
 *.o
 *.obj
 *.log
+*.swp
+*.swo
+compile_commands.json
+.vscode/ipch/

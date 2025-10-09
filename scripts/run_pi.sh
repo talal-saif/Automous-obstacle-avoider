@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")/.."
-cmake -B build -S .
-cmake --build build -j
-./build/pi/pi_main
+set -e
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if ! systemctl is-active --quiet pigpiod; then
+  echo "Starting pigpio daemon..."
+  sudo systemctl start pigpiod
+fi
+
+if [ ! -x "$ROOT/build/pi/aoa_pi" ]; then
+  cmake -S "$ROOT/pi" -B "$ROOT/build/pi"
+  cmake --build "$ROOT/build/pi" -j
+fi
+
+exec "$ROOT/build/pi/aoa_pi"

@@ -1,0 +1,11 @@
+{
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "files.associations": {
+        "*.hpp": "cpp",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "thread": "cpp"
+    }
+}

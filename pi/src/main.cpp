@@ -1,137 +1,132 @@
-#include "motors.hpp"
-#include "navigator.hpp"
-#include "ultrasonic.hpp"
 #include <algorithm>
 #include <chrono>
-#include <cstdint> // uint32_t
-#include <iostream>
+#include <cstdint>
+#include <cstdio>
 #include <pigpio.h>
 #include <thread>
 
 using u32 = uint32_t;
-
 static inline void sleep_us(unsigned us) {
   std::this_thread::sleep_for(std::chrono::microseconds(us));
 }
 
-struct PiMotors : IMotors {
+struct PiMotors {
   const unsigned IN1 = 17, IN2 = 27, ENA = 22;
   const unsigned IN3 = 23, IN4 = 24, ENB = 25;
 
   PiMotors() {
-    gpioSetMode(IN1, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(IN2, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(IN3, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(IN4, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(ENA, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(ENB, static_cast<unsigned>(PI_OUTPUT));
+    gpioSetMode(IN1, PI_OUTPUT);
+    gpioSetMode(IN2, PI_OUTPUT);
+    gpioSetMode(IN3, PI_OUTPUT);
+    gpioSetMode(IN4, PI_OUTPUT);
+    gpioSetMode(ENA, PI_OUTPUT);
+    gpioSetMode(ENB, PI_OUTPUT);
     stop();
   }
-
-  void forward(int pwm) override {
-    gpioWrite(IN1, static_cast<unsigned>(1));
-    gpioWrite(IN2, static_cast<unsigned>(0));
-    gpioWrite(IN3, static_cast<unsigned>(1));
-    gpioWrite(IN4, static_cast<unsigned>(0));
-    gpioPWM(ENA, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
-    gpioPWM(ENB, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
+  void setPWM(unsigned gpio, unsigned duty) {
+    duty = std::clamp(duty, 0u, 255u);
+    gpioPWM(gpio, duty);
   }
-  void backward(int pwm) override {
-    gpioWrite(IN1, static_cast<unsigned>(0));
-    gpioWrite(IN2, static_cast<unsigned>(1));
-    gpioWrite(IN3, static_cast<unsigned>(0));
-    gpioWrite(IN4, static_cast<unsigned>(1));
-    gpioPWM(ENA, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
-    gpioPWM(ENB, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
+  void forward(int pwm) {
+    pwm = std::clamp(pwm, 0, 255);
+    gpioWrite(IN1, 1);
+    gpioWrite(IN2, 0);
+    gpioWrite(IN3, 1);
+    gpioWrite(IN4, 0);
+    setPWM(ENA, pwm);
+    setPWM(ENB, pwm);
   }
-  void turnRight(int pwm) override {
-    gpioWrite(IN1, static_cast<unsigned>(1));
-    gpioWrite(IN2, static_cast<unsigned>(0));
-    gpioWrite(IN3, static_cast<unsigned>(0));
-    gpioWrite(IN4, static_cast<unsigned>(1));
-    gpioPWM(ENA, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
-    gpioPWM(ENB, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
+  void left(int pwm) {
+    pwm = std::clamp(pwm, 0, 255);
+    gpioWrite(IN1, 0);
+    gpioWrite(IN2, 1);
+    gpioWrite(IN3, 1);
+    gpioWrite(IN4, 0);
+    setPWM(ENA, pwm);
+    setPWM(ENB, pwm);
   }
-  void turnLeft(int pwm) override {
-    gpioWrite(IN1, static_cast<unsigned>(0));
-    gpioWrite(IN2, static_cast<unsigned>(1));
-    gpioWrite(IN3, static_cast<unsigned>(1));
-    gpioWrite(IN4, static_cast<unsigned>(0));
-    gpioPWM(ENA, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
-    gpioPWM(ENB, static_cast<unsigned>(std::clamp(pwm, 0, 255)));
-  }
-  void stop() override {
-    gpioWrite(IN1, static_cast<unsigned>(0));
-    gpioWrite(IN2, static_cast<unsigned>(0));
-    gpioWrite(IN3, static_cast<unsigned>(0));
-    gpioWrite(IN4, static_cast<unsigned>(0));
-    gpioPWM(ENA, static_cast<unsigned>(0));
-    gpioPWM(ENB, static_cast<unsigned>(0));
+  void stop() {
+    setPWM(ENA, 0);
+    setPWM(ENB, 0);
+    gpioWrite(IN1, 0);
+    gpioWrite(IN2, 0);
+    gpioWrite(IN3, 0);
+    gpioWrite(IN4, 0);
   }
 };
 
-struct PiUltrasonic : IUltrasonic {
+struct PiUltrasonic {
   const unsigned TRIG = 5, ECHO = 6;
-  const u32 TIMEOUT_US = 25000u; // خليه unsigned لتفادي تحذير المقارنة
+  const u32 TIMEOUT_US = 250000; // 250ms
 
   PiUltrasonic() {
-    gpioSetMode(TRIG, static_cast<unsigned>(PI_OUTPUT));
-    gpioSetMode(ECHO, static_cast<unsigned>(PI_INPUT));
-    gpioWrite(TRIG, static_cast<unsigned>(0));
+    gpioSetMode(TRIG, PI_OUTPUT);
+    gpioSetMode(ECHO, PI_INPUT);
+    gpioWrite(TRIG, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   float once_cm() {
-    // 10us trigger
-    gpioWrite(TRIG, static_cast<unsigned>(0));
+    gpioWrite(TRIG, 0);
     sleep_us(2);
-    gpioWrite(TRIG, static_cast<unsigned>(1));
+    gpioWrite(TRIG, 1);
     sleep_us(10);
-    gpioWrite(TRIG, static_cast<unsigned>(0));
+    gpioWrite(TRIG, 0);
 
-    u32 t0 = gpioTick();
-    while (gpioRead(ECHO) == 0) {
-      if (gpioTick() - t0 > TIMEOUT_US)
-        return 400.0f;
-    }
     u32 start = gpioTick();
-    while (gpioRead(ECHO) == 1) {
+    while (gpioRead(ECHO) == 0) {
       if (gpioTick() - start > TIMEOUT_US)
         return 400.0f;
     }
-    u32 end = gpioTick();
-    return float(end - start) / 58.0f; // cm
+    u32 t0 = gpioTick();
+    while (gpioRead(ECHO) == 1) {
+      if (gpioTick() - t0 > TIMEOUT_US)
+        return 400.0f;
+    }
+    u32 t1 = gpioTick();
+    float us = float(t1 - t0);
+    return us / 58.0f; // cm
   }
 
-  float distance_cm() override {
+  float distance_cm() {
     float v[5];
     for (int i = 0; i < 5; i++) {
       v[i] = once_cm();
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     std::sort(v, v + 5);
-    return v[2];
+    return v[2]; // median
   }
 };
 
 int main() {
   if (gpioInitialise() < 0) {
-    std::cerr << "pigpio init failed. Run: sudo pigpiod\n";
+    std::fprintf(stderr, "pigpio init failed\n");
     return 1;
   }
 
-  PiMotors motors;
-  PiUltrasonic ultra;
-  Navigator nav(motors, ultra);
+  PiMotors m;
+  PiUltrasonic us;
 
-  nav.DRIVE_PWM = 180;
-  nav.TURN_PWM = 170;
-  nav.BACK_PWM = 150;
-  nav.STOP_CM = 25.f;
-  nav.CLEAR_CM = 40.f;
+  const int FWD_PWM = 160;
+  const int TURN_PWM = 150;
+  const float SAFE = 25.0f; // cm
 
-  std::cout << "Robot running. Ctrl+C to exit.\n";
-  nav.run_for_seconds(300.0f);
+  while (true) {
+    float d = us.distance_cm();
+    std::printf("dist = %.1f cm\n", d);
+
+    if (d < SAFE) {
+      m.left(TURN_PWM);
+      std::this_thread::sleep_for(std::chrono::milliseconds(350));
+      m.stop();
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } else {
+      m.forward(FWD_PWM);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
+
   gpioTerminate();
   return 0;
 }
