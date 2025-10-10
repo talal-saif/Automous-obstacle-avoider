@@ -1,0 +1,112 @@
+#include <gazebo/common/Events.hh>
+#include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Time.hh>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/sensors/RaySensor.hh>
+#include <gazebo/sensors/Sensor.hh>
+
+#include <functional> // std::bind
+#include <iostream>
+
+namespace gazebo {
+
+class AvoiderPlugin : public SensorPlugin {
+public:
+  void Load(sensors::SensorPtr sensor, sdf::ElementPtr sdf) override {
+    // تأكد إن الحساس Ray
+    ray_ = std::dynamic_pointer_cast<sensors::RaySensor>(sensor);
+    if (!ray_) {
+      std::cerr << "[Gazebo] RaySensor not found\n";
+      return;
+    }
+
+    // أحصل على العالم والموديل
+    physics::WorldPtr world = physics::get_world(sensor->WorldName());
+    if (!world) {
+      std::cerr << "[Gazebo] World not found\n";
+      return;
+    }
+
+    model_ = world->ModelByName("avoider_robot");
+    if (!model_) {
+      std::cerr << "[Gazebo] Model 'avoider_robot' not found\n";
+      return;
+    }
+
+    // باراميترات من SDF (افتراضيات عند عدم الوجود)
+    leftJointName_ =
+        sdf->Get<std::string>("left_joint", "left_wheel_joint").first;
+    rightJointName_ =
+        sdf->Get<std::string>("right_joint", "right_wheel_joint").first;
+    safeDist_ = sdf->Get<double>("safe_distance", 0.25).first;
+    turnMs_ = sdf->Get<int>("turn_time_ms", 350).first;
+    speed_ = sdf->Get<double>("speed", 2.0).first;
+
+    left_ = model_->GetJoint(leftJointName_);
+    right_ = model_->GetJoint(rightJointName_);
+    if (!left_ || !right_) {
+      std::cerr << "[Gazebo] Wheel joints not found\n";
+      return;
+    }
+
+    // حدث التحديث
+    updateConn_ =
+        ray_->ConnectUpdated(std::bind(&AvoiderPlugin::OnUpdate, this));
+    ray_->SetActive(true);
+
+    std::cout << "[Gazebo] AvoiderPlugin loaded\n";
+  }
+
+  void OnUpdate() {
+    // أقل مدى أمامي
+    double minRange = 1e9;
+    const unsigned int n = ray_->RangeCount();
+    for (unsigned int i = 0; i < n; ++i) {
+      const double r = ray_->Range(i);
+      if (r < minRange)
+        minRange = r;
+    }
+
+    // قرار بسيط
+    if (minRange < safeDist_) {
+      // back 300ms
+      setWheels(-speed_ * 0.5, -speed_ * 0.5);
+      gazebo::common::Time start = ray_->LastUpdateTime();
+      while ((ray_->LastUpdateTime() - start).Double() * 1000.0 < 300.0) {
+      }
+
+      // turn left turnMs_
+      start = ray_->LastUpdateTime();
+      setWheels(-speed_ * 0.5, +speed_ * 0.5);
+      while ((ray_->LastUpdateTime() - start).Double() * 1000.0 <
+             static_cast<double>(turnMs_)) {
+      }
+    } else {
+      // forward
+      setWheels(speed_, speed_);
+    }
+  }
+
+private:
+  void setWheels(double leftVel, double rightVel) {
+    // Velocity على القناة 0
+    if (left_)
+      left_->SetVelocity(0, leftVel);
+    if (right_)
+      right_->SetVelocity(0, rightVel);
+  }
+
+  sensors::RaySensorPtr ray_;
+  physics::ModelPtr model_;
+  physics::JointPtr left_, right_;
+  event::ConnectionPtr updateConn_;
+
+  std::string leftJointName_, rightJointName_;
+  double safeDist_{0.25}, speed_{2.0};
+  int turnMs_{350};
+};
+
+GZ_REGISTER_SENSOR_PLUGIN(AvoiderPlugin)
+
+} // namespace gazebo

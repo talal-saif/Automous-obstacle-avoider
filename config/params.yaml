@@ -1,15 +1,16 @@
 safe_distance_cm: 25
-turn_ms: 350
-backoff_ms: 200
-forward_pwm: 160
-turn_pwm: 150
+backoff_ms: 300
+scan_turn_ms: 350
+loop_delay_ms: 60
+max_speed_pwm: 180   # 0..255
+mode: sim            # sim | pi
 
 pins:
-  trig: 5
-  echo: 6
-  in1: 17
-  in2: 27
-  ena: 22
-  in3: 23
-  in4: 24
-  enb: 25
+  trig: 23
+  echo: 24
+  motor_left_pwm: 12
+  motor_left_in1: 5
+  motor_left_in2: 6
+  motor_right_pwm: 13
+  motor_right_in1: 19
+  motor_right_in2: 26

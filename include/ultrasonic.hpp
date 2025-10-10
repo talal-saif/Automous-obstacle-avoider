@@ -1,6 +1,12 @@
 #pragma once
-struct IUltrasonic {
-  virtual ~IUltrasonic() = default;
-  // returns cm (typical range 5..400 for HC-SR04)
-  virtual float distance_cm() = 0;
+#include "params.hpp"
+
+class Ultrasonic {
+public:
+  virtual ~Ultrasonic() = default;
+  virtual void begin(const Params &) = 0;
+  virtual int read_distance_cm() = 0; // 0 لو فشل/تايم آوت
 };
+
+Ultrasonic *create_ultrasonic_sim();
+Ultrasonic *create_ultrasonic_pi();

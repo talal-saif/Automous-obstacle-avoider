@@ -1,7 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
+# تشغيل وضع المحاكاة (Simulation Mode)
+
 set -e
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cmake -S "$ROOT/sim" -B "$ROOT/build/sim"
-cmake --build "$ROOT/build/sim" -j
-export GAZEBO_PLUGIN_PATH="$ROOT/build/sim:$GAZEBO_PLUGIN_PATH"
-exec gazebo "$ROOT/sim/worlds/aoa.world" --verbose
+
+if [ ! -d build ]; then
+  echo "[INFO] Build folder not found. Building project..."
+  cmake -B build -S .
+  cmake --build build -j
+fi
+
+echo "[RUN] Starting simulation mode..."
+./build/sim_main
+            
