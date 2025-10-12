@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="pro_world">
+    <gravity>0 0 -9.81</gravity>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- حائط خلفي ولون غامق -->
+    <model name="back_wall">
+      <static>true</static>
+      <pose>1.2 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="col">
+          <geometry><box><size>2.4 0.05 1.0</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>2.4 0.05 1.0</size></box></geometry>
+          <material><diffuse>0.15 0.15 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- عائق أحمر -->
+    <model name="box_red">
+      <static>true</static>
+      <pose>0.6 0.15 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>0.15 0.15 0.5</size></box></geometry></collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 0.15 0.5</size></box></geometry>
+          <material><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- الروبوت -->
+    <include>
+      <uri>model://avoider_robot</uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <physics type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
+
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.5 0.6 0.9 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>2.5 -2.0 1.5 0 0.3 2.2</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+  </world>
+</sdf>
