@@ -1,22 +1,17 @@
 # Build artifacts
 build/
+compile_commands.json
 CMakeFiles/
 CMakeCache.txt
-cmake_install.cmake
-Makefile
-
-# IDE/editor stuff
-.vscode/
-.cache/
-.cache/*
-.clangd/
-*.swp
-*.swo
-
-# Generated databases
-compile_commands.json
-
-# Logs & misc
+*.o
+*.a
+*.so
 *.log
-*.tmp
-*.DS_Store
+
+# IDE stuff
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
