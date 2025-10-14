@@ -1,0 +1,134 @@
+<?xml version="1.6" ?>
+<sdf version="1.6">
+  <model name="aoa_bot">
+    <static>false</static>
+
+    <!-- القاعدة -->
+    <link name="base_link">
+      <pose>0 0 0.05 0 0 0</pose>
+      <inertial><mass>1.5</mass></inertial>
+      <collision name="base_collision">
+        <geometry><box><size>0.20 0.15 0.05</size></box></geometry>
+      </collision>
+      <visual name="base_visual">
+        <geometry><box><size>0.20 0.15 0.05</size></box></geometry>
+        <material><ambient>0.2 0.6 0.9 1</ambient></material>
+      </visual>
+    </link>
+
+    <!-- العجلات -->
+    <link name="left_wheel">
+      <pose>0 0.09 0.03 0 0 0</pose>
+      <inertial><mass>0.1</mass></inertial>
+      <collision name="lw_collision"><geometry><cylinder><radius>0.03</radius><length>0.02</length></cylinder></geometry></collision>
+      <visual name="lw_visual"><geometry><cylinder><radius>0.03</radius><length>0.02</length></cylinder></geometry></visual>
+    </link>
+    <link name="right_wheel">
+      <pose>0 -0.09 0.03 0 0 0</pose>
+      <inertial><mass>0.1</mass></inertial>
+      <collision name="rw_collision"><geometry><cylinder><radius>0.03</radius><length>0.02</length></cylinder></geometry></collision>
+      <visual name="rw_visual"><geometry><cylinder><radius>0.03</radius><length>0.02</length></cylinder></geometry></visual>
+    </link>
+
+    <!-- مفاصل تدوير العجلات -->
+    <joint name="left_wheel_hinge" type="revolute">
+      <parent>base_link</parent><child>left_wheel</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+    <joint name="right_wheel_hinge" type="revolute">
+      <parent>base_link</parent><child>right_wheel</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- حساس أمامي -->
+    <link name="front_sensor_link">
+      <pose>0.11 0 0.05 0 0 0</pose>
+      <sensor name="front_ray" type="ray">
+        <update_rate>20</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>21</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.26</min_angle>
+              <max_angle>0.26</max_angle>
+            </horizontal>
+          </scan>
+          <range><min>0.02</min><max>2.5</max></range>
+        </ray>
+        <plugin name="front_scan" filename="libgazebo_ros_ray_sensor.so">
+          <ros>
+            <namespace>/aoa</namespace>
+            <remapping>~/out:=/aoa/front/scan</remapping>
+          </ros>
+          <output_type>sensor_msgs/LaserScan</output_type>
+          <frame_name>front_sensor_link</frame_name>
+        </plugin>
+      </sensor>
+    </link>
+
+    <!-- حساس يمين -->
+    <link name="right_sensor_link">
+      <pose>0.07 -0.08 0.05 0 0 -1.047</pose> <!-- -60° -->
+      <sensor name="right_ray" type="ray">
+        <update_rate>20</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>21</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.26</min_angle>
+              <max_angle>0.26</max_angle>
+            </horizontal>
+          </scan>
+          <range><min>0.02</min><max>2.0</max></range>
+        </ray>
+        <plugin name="right_scan" filename="libgazebo_ros_ray_sensor.so">
+          <ros><namespace>/aoa</namespace><remapping>~/out:=/aoa/right/scan</remapping></ros>
+          <output_type>sensor_msgs/LaserScan</output_type>
+          <frame_name>right_sensor_link</frame_name>
+        </plugin>
+      </sensor>
+    </link>
+
+    <!-- حساس يسار -->
+    <link name="left_sensor_link">
+      <pose>0.07 0.08 0.05 0 0 1.047</pose> <!-- +60° -->
+      <sensor name="left_ray" type="ray">
+        <update_rate>20</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>21</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.26</min_angle>
+              <max_angle>0.26</max_angle>
+            </horizontal>
+          </scan>
+          <range><min>0.02</min><max>2.0</max></range>
+        </ray>
+        <plugin name="left_scan" filename="libgazebo_ros_ray_sensor.so">
+          <ros><namespace>/aoa</namespace><remapping>~/out:=/aoa/left/scan</remapping></ros>
+          <output_type>sensor_msgs/LaserScan</output_type>
+          <frame_name>left_sensor_link</frame_name>
+        </plugin>
+      </sensor>
+    </link>
+
+    <!-- بلجن القيادة الدفرنسيل -->
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros><namespace>/aoa</namespace></ros>
+      <update_rate>50</update_rate>
+      <left_joint>left_wheel_hinge</left_joint>
+      <right_joint>right_wheel_hinge</right_joint>
+      <wheel_separation>0.18</wheel_separation>
+      <wheel_diameter>0.06</wheel_diameter>
+      <cmd_vel_topic>cmd_vel</cmd_vel_topic>
+      <publish_tf>true</publish_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <max_wheel_torque>2.0</max_wheel_torque>
+      <max_wheel_acceleration>5.0</max_wheel_acceleration>
+    </plugin>
+  </model>
+</sdf>

@@ -1,0 +1,12 @@
+aoa:
+  ros__parameters:
+    # Safety & motion
+    safe_distance: 0.35        # m
+    cruise_speed: 0.18         # m/s
+    backoff_speed: -0.05       # m/s (when obstacle ahead)
+    max_angular: 0.9           # rad/s
+    gain_bias: 0.6             # steering bias from (left-right) distance
+
+    # Timings (used later in recovery behaviors)
+    backoff_ms: 300            # ms
+    scan_turn_ms: 350          # ms

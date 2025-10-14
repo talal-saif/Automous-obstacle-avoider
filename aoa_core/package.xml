@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>aoa_core</name>
+  <version>0.0.1</version>
+  <description>Core/shared configs and parameters for Autonomous Obstacle Avoider.</description>
+  <maintainer email="talal.robotics@gmail.com">talalrobot</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- لا توجد تبعيات تشغيل أخرى لأننا ننشر إعدادات فقط -->
+  <export/>
+</package>
